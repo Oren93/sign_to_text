@@ -32,10 +32,10 @@ def video_files_to_pandas():
 
 # Converts Json file into panda format (excluding missing)
 def json_to_pandas():
-    with open("missing.txt", 'r') as file:
+    with open("data/missing.txt", 'r') as file:
         missing = [int(line.strip()) for line in file]
 
-    f = open("WLASL_v0.3.json")
+    f = open("data/WLASL_v0.3.json")
     data = json.load(f)
     f.close()
 
@@ -66,7 +66,7 @@ def json_to_pandas():
 # Combines video files in panda format and json file in panda format
 def load_data(filename):
     if filename in os.listdir():
-        data = pd.read_csv('video_labels.csv',dtype={'video_id':object})
+        data = pd.read_csv('data/video_labels.csv',dtype={'video_id':object})
     else:
         video_pandas = video_files_to_pandas()
         json_pandas = json_to_pandas()
