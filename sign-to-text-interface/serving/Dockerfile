@@ -1,13 +1,28 @@
-# Pull latest image of tensorflow serving
-FROM tensorflow/serving:latest
+# Use a minimal Python image as the base
+FROM python:3.8-slim
 
-COPY . /
+# Set the working directory inside the container
+WORKDIR /app
 
-# Expose ports
-# gRPC
-EXPOSE 8500
-# REST
-EXPOSE 8501
+# Create a user
+RUN useradd -m oren
 
-ENTRYPOINT ["/usr/bin/tf_serving_entrypoint.sh"]
-CMD ["--model_name=malaria", "--model_base_path=/tf_serving"]
+# Fix permission issue
+RUN mkdir -p /var/lib/apt/lists/partial \
+    && chmod 644 /var/lib/apt/lists/partial
+
+# Install required dependencies for MediaPipe
+RUN apt-get update && apt-get install -y \
+    libopencv-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy your application code into the container
+COPY . /app
+
+# Install MediaPipe
+RUN pip install mediapipe
+RUN pip install -r requirements.txt
+
+# Command to start an interactive shell
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
