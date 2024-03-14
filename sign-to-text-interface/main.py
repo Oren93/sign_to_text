@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile
+from fastapi.responses import HTMLResponse
 from pathlib import Path
 
 UPLOAD_DIR = Path() / "uploads"
@@ -14,6 +15,4 @@ async def create_upload_file(file_upload: UploadFile):
 
     ## Do something to the file
     
-    
     return {"filename": file_upload.filename}
-
