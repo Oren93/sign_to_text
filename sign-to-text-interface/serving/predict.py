@@ -7,6 +7,12 @@ from mediapipe.framework.formats import landmark_pb2
 import cv2
 
 FRAMES = 24
+POSE = np.hstack((np.ones(33), np.zeros(21+21+468))) == 1
+LH = np.hstack((np.zeros(33), np.ones(21), np.zeros(21+468))) == 1
+RH = np.hstack((np.zeros(33+21), np.ones(21), np.zeros(468))) == 1
+FACE = np.hstack((np.zeros(33+21+21), np.ones(468))) == 1
+DIMENSTIONS = 3
+
 # The following is hardcoded, will be loaded from file in later versions:
 words = ['tall', 'man', 'red', 'shirt', 'play', 'basketball', 'well', 
     'neighborhood', 'cold', 'pizza', 'top', 'extra', 'cheese', 
@@ -20,6 +26,9 @@ index_to_word = {word: i for i, word in enumerate(words)}
 # %%
 newest_model = max(os.listdir('lstm'))
 model = load_model(os.path.join('lstm',newest_model,'sign_to_text.keras'))
+#models_dir = '/app/serving/lstm'
+#newest_model = max(os.listdir(models_dir))
+#model = load_model(os.path.join(models_dir,newest_model,'sign_to_text.keras'))
 
 #%%
 def get_landmarks(results):
@@ -33,10 +42,10 @@ def get_landmarks(results):
 
 def extract_landmarks(video_path):
     mp_holistic = mp.solutions.holistic # Holistic model
-    cap = cv2.VideoCapture
+    cap = cv2.VideoCapture(video_path)
     # Set mediapipe model
-    ret, frame = cap.read(video_path)
-    video_landmarks  = np.array([])
+    ret, frame = cap.read()
+    video_landmarks = []
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         while True:
             # Read feed
@@ -48,9 +57,9 @@ def extract_landmarks(video_path):
             results = holistic.process(frame)  # Finds pose
             # save the landmarks for that frame
             frame = get_landmarks(results)
-            video_landmarks = np.append(video_landmarks,frame)
+            video_landmarks.append(frame)
     cap.release()
-    return video_landmarks
+    return np.stack(video_landmarks, axis=0)
 
 def pick_frames(video,num_frames):
     if len(video) < num_frames:
@@ -65,9 +74,13 @@ def pick_frames(video,num_frames):
 # %%
 def make_prediction(video):
     landmarks = extract_landmarks(video)
-    landmarks = pick_frames(landmarks,FRAMES)
+    landmarks = pick_frames(landmarks[:,POSE+LH+RH,:DIMENSTIONS],FRAMES)
+
+    # Note: the model expect shape (None, 24, 225) so we wrap the array more
+    landmarks = np.array([[frame.flatten() for frame in landmarks]])
+
     predict_result = model.predict(landmarks)
     word_index = np.argmax(predict_result)
     predicted_word = words[word_index]
-    confidence = predict_result[word_index]
+    confidence = predict_result[0,word_index]
     return predicted_word, confidence
