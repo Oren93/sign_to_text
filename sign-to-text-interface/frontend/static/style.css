@@ -27,6 +27,8 @@ body {
 .table {
     width: 100%;
     border-collapse: collapse;
+    text-align: center;
+    margin: 0 auto;
 }
 
 .table th, .table td {
@@ -37,6 +39,7 @@ body {
 
 .table th {
     background-color: #f2f2f2;
+
 }
 
 .table tr:hover {
