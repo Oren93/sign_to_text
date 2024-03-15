@@ -1,20 +1,37 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>FastAPI File Uploads</title>
-        <link rel="stylesheet" type="text/css" href="style.css">
+        <title>Táknmálstúlkur</title>
+        <link rel="stylesheet" type="text/css" href="./static/style.css">
     </head>
 
     <body>
+        <div class="header">
+            <h1>Táknmálstúlkur</h1>
+            <h2>An instanteneous translation from Word-Level American Sign Language to English</h2>
+        </div>
         <div class="container">
-            <h1>FastAPI File Uploads</h1>
+            <p>Submit a short clip of the signed word here!</p>
             <form method="POST" action="http://localhost:8000/uploadfile/" enctype="multipart/form-data">
                 <input type="file" name="file_upload" />
                 <button type="submit">Submit</button>
             </form>
-
-            <label for="output">Output:</label>
-            <textarea id="output" rows="4" cols="50"></textarea>
+        </div>
+        <div class="response">
+            <table class="table">
+                <tr>
+                    <th>Filename</th>
+                    <th>Predicted Word</th>
+                    <th>Confidence Level</th>
+                </tr>
+                {% for val in values %}
+                <tr>
+                    <td>{{val.filename}}</td>
+                    <td>{{val.predicted_word}}</td>
+                    <td>{{val.confidence_level}}</td>
+                </tr>
+                {% endfor %}
+            </table>
         </div>
     </body>
 </html>
