@@ -12,7 +12,7 @@ services:
     tty: true
     networks:
       - frontend_backend
-    command: ["bash"] #, "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"]
+    command: ["bash", "-c", "uvicorn main:app --reload --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"]
 
 networks:
   frontend_backend:
