@@ -1,31 +1,18 @@
 version: "3"
 services:
-  sign_model:
-    build:
-      context: ./serving
-    container_name: model_server
+  app:
+    build: ./serving
+    container_name: sign_to_text
     ports:
       - "8000:8000"
+      - "8080:8080"
     volumes:
       - ./serving:/app/
     stdin_open: true
     tty: true
     networks:
       - frontend_backend
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-
-
-  frontend:
-    build: ./serving/frontend
-    container_name: frontend
-    depends_on:
-      - sign_model
-    ports:
-      - "8080:80"
-    stdin_open: true
-    tty: true
-    networks:
-      - frontend_backend
+    command: ["bash"] #, "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"]
 
 networks:
   frontend_backend:

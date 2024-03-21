@@ -1,27 +1,34 @@
-# Use a minimal Python image as the base
+# Use a Python base image
 FROM python:3.8-slim
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Create a user
-RUN useradd -m oren
-
-# Fix permission issue
-RUN mkdir -p /var/lib/apt/lists/partial \
-    && chmod 644 /var/lib/apt/lists/partial
-
-# Install required dependencies for MediaPipe
+# Install system dependencies for MediaPipe and nginx
 RUN apt-get update && apt-get install -y \
     libopencv-dev \
+    nginx \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy your application code into the container
+# Copy the Python application code into the container
+COPY requirements.txt /app/requirements.txt
+
+# Install Python dependencies
+RUN pip install mediapipe
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+
+# Copy the Python application code into the container
 COPY . /app
 
-# Install MediaPipe
-RUN pip install mediapipe
-RUN pip install -r requirements.txt
+# Create nginx user
+RUN useradd -r nginx
 
-# Command to start an interactive shell
+# Copy the nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Expose ports for uvicorn and nginx
+EXPOSE 8000 8080
+
+# Command to start both uvicorn server and nginx when the container starts
 CMD ["bash"]
+# , "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"]

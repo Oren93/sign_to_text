@@ -24,7 +24,7 @@ words = ['tall', 'man', 'red', 'shirt', 'play', 'basketball', 'well',
     'daughter', 'excel', 'academics', 'sports', 'good']
 index_to_word = {word: i for i, word in enumerate(words)}
 # %%
-newest_model = max(os.listdir('lstm'))
+newest_model = '2'#max(os.listdir('lstm'))
 model = load_model(os.path.join('lstm',newest_model,'sign_to_text.keras'))
 #models_dir = '/app/serving/lstm'
 #newest_model = max(os.listdir(models_dir))
