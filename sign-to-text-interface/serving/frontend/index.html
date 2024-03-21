@@ -1,39 +1,59 @@
 <!DOCTYPE html>
 <html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <title>Táknmálstúlkur</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
 
-<html>
-    <head>
-        <title>Táknmálstúlkur</title>
-        <link rel="stylesheet" type="text/css" href="/static/style.css">
-    </head>
+<body>
+    <div class="header">
+        <h1>Táknmálstúlkur</h1>
+        <h2>An instantaneous translation from Word-Level American Sign Language to English</h2>
+    </div>
+    <div class="container">
+        <p>Submit a short clip of the signed word here!</p>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="file_upload" name="file_upload" />
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div class="response">
+        <table class="table" id="resultTable">
+            <tr>
+                <th>Filename</th>
+                <th>Predicted Word</th>
+                <th>Confidence Level</th>
+            </tr>
+        </table>
+    </div>
 
-    <body>
-        <div class="header">
-            <h1>Táknmálstúlkur</h1>
-            <h2>An instanteneous translation from Word-Level American Sign Language to English</h2>
-        </div>
-        <div class="container">
-            <p>Submit a short clip of the signed word here!</p>
-            <form method="POST" action="http://localhost:8000/uploadfile/" enctype="multipart/form-data">
-                <input type="file" name="file_upload" />
-                <button type="submit">Submit</button>
-            </form>
-        </div>
-        <div class="response">
-            <table class="table">
-                <tr>
-                    <th>Filename</th>
-                    <th>Predicted Word</th>
-                    <th>Confidence Level</th>
-                </tr>
-                {% for val in values %}
-                <tr>
-                    <td>{{val.filename}}</td>
-                    <td>{{val.predicted_word}}</td>
-                    <td>{{val.confidence_level}}</td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-    </body>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+    
+            var formData = new FormData();
+            var fileInput = document.getElementById('file_upload');
+            formData.append('file_upload', fileInput.files[0]); // Append file to FormData
+        
+            fetch('http://localhost:8000/uploadfile/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+    
+                result = JSON.parse(data)
+                // Display result in the table
+                var resultTable = document.getElementById('resultTable');
+                var newRow = resultTable.insertRow();
+                newRow.insertCell(0).appendChild(document.createTextNode(fileInput.files[0].name));
+                newRow.insertCell(1).appendChild(document.createTextNode(result.predicted_word));
+                newRow.insertCell(2).appendChild(document.createTextNode(result.confidence_level));
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+    
+</body>
 </html>
