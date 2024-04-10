@@ -1,17 +1,13 @@
-from fastapi import FastAPI, UploadFile, Request
-from fastapi.responses import HTMLResponse
-from fastapi.responses import PlainTextResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import Response
+from fastapi import FastAPI, UploadFile, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from pathlib import Path
-from predict import make_prediction
-import os
 import json
 
+import os
+from starlette.requests import Request
 
-UPLOAD_DIR = Path("./uploads")
-UPLOAD_DIR_2 = os.path.join(os.getcwd(),("uploads"))
+#from predict import make_prediction # Temporarily commented for faster server reload
+
+UPLOAD_DIR = os.path.join(os.getcwd(),("uploads"))
 
 app = FastAPI()
 origins = [
@@ -27,17 +23,69 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="./frontend/static"), name="static")
-
 @app.post('/uploadfile/')
 async def create_upload_file(file_upload: UploadFile, request: Request):
     data = await file_upload.read()
-    path = UPLOAD_DIR / file_upload.filename
-    path_2 = os.path.join(UPLOAD_DIR_2, file_upload.filename)
+    path = os.path.join(UPLOAD_DIR, file_upload.filename)
     with open(path, "wb") as f:
         f.write(data)
-
-    predicted_word, confidence = make_prediction(path_2) # TODO: Check why confidence is always 1.0
+    # The following dummy code is for faster server reload to prevent loading the model
+    return   json.dumps(
+         {"filename": 'dummy.mp4',
+          "predicted_word": 'dummy',
+          "confidence_level": str(0.77)}
+    )
+    predicted_word, confidence = make_prediction(path) # TODO: Check why confidence is always 1.0
 
     ret = {"filename": file_upload.filename, "predicted_word": predicted_word, "confidence_level": str(confidence)}
     return json.dumps(ret)
+
+
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, File, UploadFile
+import cv2
+
+app = FastAPI()
+
+# Allow all origins for CORS (adjust this as needed for your deployment)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["POST"],
+    allow_headers=["*"],
+)
+###########################################
+# Dummy, should replace with serious frame handler,
+# currently only validating that the video is being sent properly
+def do_something_to_frame(frame):
+    import matplotlib.pyplot as plt
+    plt.imshow(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+############################################
+@app.post("/live/stream")
+async def receive_video(video: UploadFile = File(...)):
+    print("video.filename: ", video.filename)
+    with open(video.filename, "wb") as f:
+        f.write(await video.read())
+    print("f", f)
+
+    # Open the video file using a video library
+    cap = cv2.VideoCapture(video.filename)
+    
+    # Get the number of frames in the video
+    total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    print("total_frames:", total_frames)
+    i = 0
+    # Iterate through the frames and print the frame number
+    # for i in range(int(total_frames)): # Currently fails, total_frames is -2e17 for some reason
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        do_something_to_frame(frame) # To be replaced by a real code
+        i += 1
+        if i % 100 == 0:
+            print(f"Frame no {i} and still running")
+    print(f"Frames: {i}")
+        
+    return {"message": "Video received"}

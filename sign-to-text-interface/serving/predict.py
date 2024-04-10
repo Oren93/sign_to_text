@@ -73,6 +73,23 @@ def pick_frames(video,num_frames):
 
 # %%
 def make_prediction(video):
+#    print(video)
+#    return 'word', 0.5
+    landmarks = extract_landmarks(video)
+    landmarks = pick_frames(landmarks[:,POSE+LH+RH,:DIMENSTIONS],FRAMES)
+
+    # Note: the model expect shape (None, 24, 225) so we wrap the array more
+    landmarks = np.array([[frame.flatten() for frame in landmarks]])
+
+    predict_result = model.predict(landmarks)
+    word_index = np.argmax(predict_result)
+    predicted_word = words[word_index]
+    confidence = predict_result[0,word_index]
+    return predicted_word, confidence
+# %% debug cell
+def debug_prediction(video):
+    print(video)
+    return 'word', 0.5
     landmarks = extract_landmarks(video)
     landmarks = pick_frames(landmarks[:,POSE+LH+RH,:DIMENSTIONS],FRAMES)
 
