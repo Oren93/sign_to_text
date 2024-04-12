@@ -1,4 +1,5 @@
-from fastapi import FastAPI, UploadFile, Request, WebSocket, WebSocketDisconnect
+import datetime
+from fastapi import FastAPI, Form, UploadFile, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import json
 
@@ -6,6 +7,7 @@ import os
 from starlette.requests import Request
 
 #from predict import make_prediction # Temporarily commented for faster server reload
+from live_predict import make_live_prediction
 
 UPLOAD_DIR = os.path.join(os.getcwd(),("uploads"))
 
@@ -61,31 +63,42 @@ app.add_middleware(
 def do_something_to_frame(frame):
     import matplotlib.pyplot as plt
     plt.imshow(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+last_proccessed_frame = 1 # TODO: find a solid solution, this is a temporary solution
+chunk_number = 0
 ############################################
 @app.post("/live/stream")
-async def receive_video(video: UploadFile = File(...)):
-    print("video.filename: ", video.filename)
-    with open(video.filename, "wb") as f:
-        f.write(await video.read())
-    print("f", f)
+async def receive_video(video: UploadFile = File(...), rate: int = Form(...)):
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    filename = os.path.join('uploads',f"live_{timestamp}.mp4")
+    global last_proccessed_frame
+    global chunk_number 
 
-    # Open the video file using a video library
-    cap = cv2.VideoCapture(video.filename)
+    with open(filename, "wb") as f:
+        f.write(await video.read())
+    print("video.filename, filename: ", video.filename,filename)        
+    print("rate: ", rate)
     
-    # Get the number of frames in the video
+    # Open the video file using a video library
+    cap = cv2.VideoCapture(filename)
+    
+    # Get the number of frames in the video. TODO: Check why it is corrupted
     total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     print("total_frames:", total_frames)
-    i = 0
-    # Iterate through the frames and print the frame number
-    # for i in range(int(total_frames)): # Currently fails, total_frames is -2e17 for some reason
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-        do_something_to_frame(frame) # To be replaced by a real code
-        i += 1
-        if i % 100 == 0:
-            print(f"Frame no {i} and still running")
-    print(f"Frames: {i}")
-        
-    return {"message": "Video received"}
+    
+    last_proccessed_frame, predictions = make_live_prediction(filename,rate,last_proccessed_frame)
+    predictions = predictions.tolist()
+    chunk_number += 1
+    return {"chunk":chunk_number,
+            "words": predictions}
+
+@app.post('/live/stop')
+async def stop_recording():
+    global last_proccessed_frame
+    global chunk_number
+    print(last_proccessed_frame)
+    last_proccessed_frame = 0
+    chunk_number = 0
+    print(last_proccessed_frame)
+    return {"message": "Video stopped"}
+
+

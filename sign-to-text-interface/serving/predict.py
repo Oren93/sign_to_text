@@ -24,11 +24,11 @@ words = ['tall', 'man', 'red', 'shirt', 'play', 'basketball', 'well',
     'daughter', 'excel', 'academics', 'sports', 'good']
 index_to_word = {word: i for i, word in enumerate(words)}
 # %%
-newest_model = '2'#max(os.listdir('lstm'))
-model = load_model(os.path.join('lstm',newest_model,'sign_to_text.keras'))
+model_version = '2'
+model = load_model(os.path.join('lstm',model_version,'sign_to_text.keras'))
 #models_dir = '/app/serving/lstm'
-#newest_model = max(os.listdir(models_dir))
-#model = load_model(os.path.join(models_dir,newest_model,'sign_to_text.keras'))
+#model_version = max(os.listdir(models_dir))
+#model = load_model(os.path.join(models_dir,model_version,'sign_to_text.keras'))
 
 #%%
 def get_landmarks(results):

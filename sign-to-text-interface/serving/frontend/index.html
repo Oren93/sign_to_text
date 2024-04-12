@@ -17,12 +17,15 @@
             <input type="file" id="file_upload" name="file_upload" />
             <button type="submit">Submit</button>
         </form>
+    </div>
+    <div class="container">
         <button id="recordButton">Record</button>
         <button id="stopButton">Stop Recording</button>
-        <button id="sendToBackendButton">Send</button>
-    </div>
-    <div>
-        <video autoplay id="videoElement"></video>
+        <div>
+            <video autoplay id="videoElement"></video>
+        </div>
+        <div id="output">
+        </div>
     </div>
     <div class="response">
         <table class="table" id="resultTable">

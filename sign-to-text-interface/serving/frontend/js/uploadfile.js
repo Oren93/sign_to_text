@@ -5,9 +5,9 @@ let socket; // WebSocket object
 const recordButton = document.getElementById('recordButton');
 const stopButton = document.getElementById('stopButton');
 const videoElement = document.getElementById('videoElement');
-const sendToBackendButton = document.getElementById('sendToBackendButton');
-const millisecondsBatch = 5000
+const millisecondsBatch = 500
 const API_URL = 'http://localhost:8000'
+const PROCESS_RATE = 4; // Example processing rate, TODO: user adjusts in the UI
 
 // Upload file functionality
 document.getElementById('uploadForm').addEventListener('submit', function(event) {
@@ -42,24 +42,22 @@ document.getElementById('uploadForm').addEventListener('submit', function(event)
 
 
 let recordedChunks = [];
+let lastWord = ''
+
 recordButton.addEventListener('click', async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     videoElement.srcObject = stream;
 
-    console.log(stream) //////////////////////////////////////
     mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.start(millisecondsBatch)
+    mediaRecorder.start(millisecondsBatch);
     mediaRecorder.ondataavailable = async(event) => {
-        console.log('ondataavailable')//////////////////////////////////////
         recordedChunks.push(event.data);
 
         const blob = new Blob(recordedChunks, { type: 'video/webm' });
         const formData = new FormData();
         formData.append('video', blob);
-        console.log("blob")//////////////////////////////////////
-        console.log(blob)//////////////////////////////////////
-        console.log("formData")//////////////////////////////////////
-        console.log(formData)//////////////////////////////////////
+        const rate = PROCESS_RATE;
+        formData.append('rate', rate);
 
         const response = await fetch(`${API_URL}/live/stream`, {
             method: 'POST',
@@ -67,30 +65,49 @@ recordButton.addEventListener('click', async () => {
         });
 
         const data = await response.json();
-        console.log(data);//////////////////////////////////////
+        
+        // Check if data is an array
+        if (Array.isArray(data.words)) {
+            // Iterate through the 2D array of words and confidence values
+            data.words.forEach(([word, confidence]) => {
+                const textDiv = document.getElementById('output');
+                // Create a new <span> element for each word
+                const wordSpan = document.createElement('span');
+                wordSpan.textContent = word + ' ';
+                if (lastWord === word){
+                    return
+                }
+                lastWord = word; // Update lastWord with the current word
+                // Set the color of the <span> based on the confidence level
+                if (confidence >= 0.8) {
+                    wordSpan.style.color = 'green'; // High confidence, green color
+                } else if (confidence >= 0.5) {
+                    wordSpan.style.color = 'orange'; // Medium confidence, orange color
+                } else {
+                    wordSpan.style.color = 'red'; // Low confidence, red color
+                }
+                // Append the <span> element to the container <div>
+                textDiv.appendChild(wordSpan);
+            });
+        } else {
+            console.error('Data is not an array:', data);
+        }
+
+
     };
 });
 
-stopButton.addEventListener('click', () => {
-    console.log('Stop record')//////////////////////////////////////
-    mediaRecorder.stop();
-});
-
-sendToBackendButton.addEventListener('click', async () => {
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    const formData = new FormData();
-    formData.append('video', blob);
-    console.log("blob")//////////////////////////////////////
-    console.log(blob)//////////////////////////////////////
-    console.log("formData")//////////////////////////////////////
-    console.log(formData)//////////////////////////////////////
-
-    const response = await fetch(`${API_URL}/live/stream`, {
+stopButton.addEventListener('click', async() => {
+    const response = await fetch(`${API_URL}/live/stop`, {
         method: 'POST',
-        body: formData,
+        body: '',
     });
 
-    const data = await response.json();
-    console.log(data);//////////////////////////////////////
-});
+    // Stop the video stream in the UI
+    const stream = videoElement.srcObject;
+    const tracks = stream.getTracks();
+    tracks.forEach(track => track.stop());
+    videoElement.srcObject = null;
 
+    mediaRecorder.stop();
+});
