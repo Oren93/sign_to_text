@@ -67,6 +67,7 @@ def random_shift(seed):
         r = np.flip(r, axis=1)
     return r
 
+# Include raw landmarks and produced augmentations
 def produce_augmentations(landmarks_raw,data_info):
     seed = 1
     landmarks = landmarks_raw.copy()
@@ -83,7 +84,7 @@ def produce_augmentations(landmarks_raw,data_info):
             shifted_id, shifted_landmarks = shift_hands(id = id, video = video, shift_rate = shift_rate)
 
             mirrored_id, mirrored_landmarks = flip_hands(id = id,video = video)
-            mirrored_shifted_id, mirrored_shifted_landmarks = flip_hands(id = shifted_id,video = shifted_landmarks)
+            mirrored_shifted_id, mirrored_shifted_landmarks = flip_hands(id = shifted_id, video = shifted_landmarks)
 
             landmarks[shifted_id] = shifted_landmarks
             landmarks[mirrored_id] = mirrored_landmarks
