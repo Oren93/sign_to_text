@@ -3,9 +3,8 @@ from tensorflow.keras.models import load_model
 import numpy as np
 import os
 import mediapipe as mp
-from mediapipe.framework.formats import landmark_pb2
 import cv2
-
+from words import words_for_model
 FRAMES = 24
 POSE = np.hstack((np.ones(33), np.zeros(21+21+468))) == 1
 LH = np.hstack((np.zeros(33), np.ones(21), np.zeros(21+468))) == 1
@@ -13,22 +12,11 @@ RH = np.hstack((np.zeros(33+21), np.ones(21), np.zeros(468))) == 1
 FACE = np.hstack((np.zeros(33+21+21), np.ones(468))) == 1
 DIMENSTIONS = 3
 
-# The following is hardcoded, will be loaded from file in later versions:
-words = ['tall', 'man', 'red', 'shirt', 'play', 'basketball', 'well', 
-    'neighborhood', 'cold', 'pizza', 'top', 'extra', 'cheese', 
-    'taste', 'absolutely', 'delicious', 'lazy', 'Sunday',
-    'afternoon', 'dark', 'room', 'lit', 'small', 'lamp', 'completely',
-    'empty', 'echo', 'big', 'dog', 'wag', 'tail', 'walk',
-    'beautiful', 'park', 'every', 'morning', 'short',
-    'woman', 'wear', 'colorful', 'dress', 'have', 'beautiful',
-    'daughter', 'excel', 'academics', 'sports', 'good']
-index_to_word = {word: i for i, word in enumerate(words)}
 # %%
 model_version = '2'
+words = words_for_model[model_version]
+index_to_word = {word: i for i, word in enumerate(words)}
 model = load_model(os.path.join('lstm',model_version,'sign_to_text.keras'))
-#models_dir = '/app/serving/lstm'
-#model_version = max(os.listdir(models_dir))
-#model = load_model(os.path.join(models_dir,model_version,'sign_to_text.keras'))
 
 #%%
 def get_landmarks(results):
@@ -75,21 +63,6 @@ def pick_frames(video,num_frames):
 def make_prediction(video):
 #    print(video)
 #    return 'word', 0.5
-    landmarks = extract_landmarks(video)
-    landmarks = pick_frames(landmarks[:,POSE+LH+RH,:DIMENSTIONS],FRAMES)
-
-    # Note: the model expect shape (None, 24, 225) so we wrap the array more
-    landmarks = np.array([[frame.flatten() for frame in landmarks]])
-
-    predict_result = model.predict(landmarks)
-    word_index = np.argmax(predict_result)
-    predicted_word = words[word_index]
-    confidence = predict_result[0,word_index]
-    return predicted_word, confidence
-# %% debug cell
-def debug_prediction(video):
-    print(video)
-    return 'word', 0.5
     landmarks = extract_landmarks(video)
     landmarks = pick_frames(landmarks[:,POSE+LH+RH,:DIMENSTIONS],FRAMES)
 
