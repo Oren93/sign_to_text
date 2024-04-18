@@ -18,5 +18,11 @@ words_for_model = {
        'play', 'short', 'basketball', 'have', 'red', 'room', 'cold',
        'daughter', 'dress', 'small', 'cheese', 'delicious', 'afternoon',
        'morning', 'big', 'lazy', 'top', 'every', 'beautiful', 'taste',
-       'wear', 'empty', 'lamp']
+       'wear', 'empty', 'lamp'],
+    '7':
+    ['book', 'drink', 'computer', 'before', 'chair', 'go', 'clothes',
+     'who', 'candy', 'cousin', 'deaf', 'fine', 'help', 'no', 'thin',
+     'walk', 'year', 'yes', 'all', 'black', 'cool', 'finish', 'hot',
+     'like', 'many', 'mother', 'now', 'orange', 'table', 'thanksgiving',
+     'what']
 }

@@ -11,7 +11,7 @@ LH = np.hstack((np.zeros(33), np.ones(21), np.zeros(21+468))) == 1
 RH = np.hstack((np.zeros(33+21), np.ones(21), np.zeros(468))) == 1
 FACE = np.hstack((np.zeros(33+21+21), np.ones(468))) == 1
 # %%
-model_version = '6'
+model_version = '7'
 words = words_for_model[model_version]
 index_to_word = {word: i for i, word in enumerate(words)}
 
