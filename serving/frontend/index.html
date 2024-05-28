@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <title>sign to text</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <h1>Sign to Text</h1>
+        <h2>An instantaneous translation from Word-Level American Sign Language to English</h2>
+    </div>
+    <div class="container">
+        <p>Record Your signs for immediate text translation</p>
+        <button id="recordButton">Record</button>
+        <div>
+            <video autoplay id="videoElement"></video>
+        </div>
+        <div id="output">
+        </div>
+    </div>
+    <div class="container">
+        <p>Submit a short clip of the signed word here!</p>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="file_upload" name="file_upload" />
+            <button type="submit">Submit</button>
+        </form>
+        <div id="response" class="response">
+            <table class="table" id="resultTable">
+                <tr>
+                    <th>Filename</th>
+                    <th>Predicted Word</th>
+                    <th>Confidence Level</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="./js/uploadfile.js"></script>
+</body>
+</html>

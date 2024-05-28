@@ -1,3 +1,6 @@
-videos
-data/*
-sign-to-text-interface/uploads
+.DS_Store
+__pycache__/
+serving/__pycache__/
+assignments/data/*
+assignments/videos/*
+uploads

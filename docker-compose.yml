@@ -1,0 +1,18 @@
+version: "3"
+services:
+  app:
+    build: ./serving
+    container_name: sign_to_text
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+    volumes:
+      - ./serving:/app/
+    stdin_open: true
+    tty: true
+    networks:
+      - frontend_backend
+    command: ["bash", "-c", "uvicorn main:app --reload --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"]
+
+networks:
+  frontend_backend:
