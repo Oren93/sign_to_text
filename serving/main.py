@@ -10,6 +10,8 @@ from predict import make_prediction
 from live_predict import make_live_prediction
 
 UPLOAD_DIR = os.path.join(os.getcwd(),("uploads"))
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
 
 app = FastAPI()
 origins = [

@@ -8,11 +8,12 @@ Welcome to the Sign Speech Recognition project! This repository contains the com
 - [Features](#features)
 - [Installation and Setup](#installation-and-setup)
 - [Usage](#usage)
+- [Data Source](#data-source)
 - [Project Structure](#project-structure)
 - [Assignments and Presentations](#assignments-and-presentations)
 - [Contributing](#contributing)
-- [License](#license)
 - [Acknowledgements](#acknowledgements)
+- [Further Development](#further-development)
 
 ## Overview
 
@@ -50,24 +51,33 @@ Once the application is running, you can interact with the sign speech recogniti
 
 _NOTE: This is a prototype only, due to limited computing power we used a small subset of the dataset and trained only a few epochs, therefore the model can only detect 16-32 words_
 
+## Data Source
+
+The data used for training and evaluating the sign language recognition model was collected by members of The Australian National University. You can read more about their work and the dataset in their [article](https://arxiv.org/pdf/1910.11006).
+
 ## Project Structure
 
 ```markdown
-sign-speech-recognition/
-├── assignments_description/ # Weekly assignment descriptions
-├── data/ # Dataset used for training and evaluation
-├── docker-compose.yml # Docker Compose file for setting up the environment
-├── Dockerfile # Dockerfile for building the image
-├── models/ # Trained models
-├── notebooks/ # Jupyter notebooks for data exploration and model training
-├── presentations/ # PowerPoint presentations showcasing project progress
-├── src/ # Source code for the application
-└── README.md # Project README file
+sign-to-text/
+├── README.md
+├── assignments
+│   ├── assignment_description # PDF of the weekly assignment
+│   ├── assignment_presentations # Slides used for our weekly presentations
+│   ├── data # Metadata of the videos
+│   └── videos # Not included on Github, need to apply for it
+├── docker-compose.yml
+└── serving
+├── Dockerfile
+├── cnn # CNN model, not used eventually
+├── frontend
+├── landmark_nn # Mediapipe landmarks model, used for live prediction
+├── lstm # LSTM model, used for single word video upload
+└── uploads # Stores the uploaded videos
 ```
 
 ## Assignments and Presentations
 
-In the `assignments_description` and `presentations` folders, you will find detailed documentation and presentations used throughout the course. These documents provide insights into our methodology, challenges faced, and the evolution of the project.
+In the `assignment_description` and `assignment_presentations` folders, you will find detailed documentation and presentations used throughout the course. These documents provide insights into our methodology, challenges faced, and the evolution of the project.
 
 ## Contributing
 
